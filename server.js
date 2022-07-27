@@ -37,13 +37,13 @@ app.get('/',async (request, response)=>{  //get request to display using asynchr
     // .catch(error => console.error(error))
 })
 
-app.post('/addTodo', (request, response) => {
-    db.collection('todos').insertOne({thing: request.body.todoItem, completed: false})
-    .then(result => {
-        console.log('Todo Added')
-        response.redirect('/')
+app.post('/addTodo', (request, response) => { //add item to database through addToDo
+    db.collection('todos').insertOne({thing: request.body.todoItem, completed: false}) //server goes into todos collection to insert one todoItem with completed status set to false.
+    .then(result => { //result
+        console.log('Todo Added') //console log todo added
+        response.redirect('/') //refresh index.ejs to show new update to database
     })
-    .catch(error => console.error(error))
+    .catch(error => console.error(error)) //console log error when broken
 })
 
 app.put('/markComplete', (request, response) => { //when we click on something completed
@@ -67,22 +67,22 @@ app.put('/markComplete', (request, response) => { //when we click on something c
 app.put('/markUnComplete', (request, response) => { //activate upon clicking something that was marked as completed
     db.collection('todos').updateOne({thing: request.body.itemFromJS},{ //goes into collection and look for item from itemFromJS
         $set: { 
-            completed: false
+            completed: false, //undo markComplete. Completed status to false 
           }
     },{
-        sort: {_id: -1},
-        upsert: false
+        sort: {_id: -1}, // once something has been marked incomplete, this sorts the array by descending order by id
+        upsert: false //doesn't create document for todo collection if item isn't located
     })
-    .then(result => {
-        console.log('Marked Complete')
-        response.json('Marked Complete')
+    .then(result => { //result
+        console.log('Marked Complete') //console log marked complete
+        response.json('Marked Complete') //return response of marked complete to fetch in main.js
     })
-    .catch(error => console.error(error))
+    .catch(error => console.error(error)) //console log error if broken
 
 })
 
 //database collects todos; request class itemfromJS from the body; get result then console log "todo deleted" then run json response
-app.delete('/deleteItem', (request, response) => { //
+app.delete('/deleteItem', (request, response) => { //delete item
     db.collection('todos').deleteOne({thing: request.body.itemFromJS}) //go into collection and use deleteOne method to find a thing that matches the name of clicked event listener
     .then(result => { // result
         console.log('Todo Deleted') //console log todo deleted
